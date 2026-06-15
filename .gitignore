@@ -1,4 +1,5 @@
-.envgit commit -m "Fase 2: Entorno virtual configurado y conexión exitosa con Neon"venv/
+venv/
 __pycache__/
 *.pyc
 .streamlit/
+.env
