@@ -8,36 +8,35 @@ from dotenv import load_dotenv
 # Cargar el archivo .env por si acaso estás en local
 load_dotenv()
 
+
+
+
 def obtener_conexion():
-    """Establece la conexión central a Postgres de forma dinámica para Local o Web."""
-    # 1. Si estamos en la Web (Streamlit Cloud), usamos st.secrets
-    if "DB_HOST" in st.secrets:
+    """Establece la conexión central a Postgres detectando el entorno real."""
+    # Detectar si estamos en la nube de Streamlit (usualmente corren en Linux)
+    # o si existe la variable de entorno que asigna Streamlit de forma nativa.
+    en_la_nube = os.name != 'nt' or "STREAMLIT_SERVER_PORT" in os.environ or "DB_HOST" in st.secrets
+
+    if en_la_nube:
+        # Forzamos la lectura directa de los Secrets de la web
         host = st.secrets["DB_HOST"]
         database = st.secrets["DB_NAME"]
         user = st.secrets["DB_USER"]
         password = st.secrets["DB_PASSWORD"]
-    # 2. Si estamos en tu computadora local, usamos el archivo .env o valores por defecto
     else:
+        # Entorno local de tu computadora (Windows)
         host = os.getenv("DB_HOST", "localhost")
         database = os.getenv("DB_NAME", "avalon_db")
         user = os.getenv("DB_USER", "postgres")
-        # Aquí metemos 'baretta' por si tu .env local no lo tiene registrado
-        password = os.getenv("DB_PASSWORD", "baretta") 
+        password = os.getenv("DB_PASSWORD", "baretta")
 
     return psycopg2.connect(
         host=host,
         database=database,
         user=user,
         password=password,
-        connect_timeout=3
+        connect_timeout=5
     )
-
-
-
-
-
-
-
 
 
 
