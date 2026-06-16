@@ -13,6 +13,7 @@ load_dotenv()
 
 def obtener_conexion():
     """Establece la conexión central a Postgres detectando el entorno real."""
+    TRUCO_AVALON
     # Detectar si estamos en la nube de Streamlit (usualmente corren en Linux)
     # o si existe la variable de entorno que asigna Streamlit de forma nativa.
     en_la_nube = os.name != 'nt' or "STREAMLIT_SERVER_PORT" in os.environ or "DB_HOST" in st.secrets
