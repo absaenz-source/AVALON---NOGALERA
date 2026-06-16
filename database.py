@@ -5,26 +5,25 @@ import streamlit as st
 import pandas as pd
 from dotenv import load_dotenv
 
-
 # Cargar el archivo .env por si acaso estás en local
 load_dotenv()
 
 def obtener_conexion():
-    """Establece la conexión a Postgres de forma dinámica para Local o Web."""
-    # 1. Intentamos leer los Secrets de Streamlit Cloud (Si estamos en la Web)
+    """Establece la conexión central a Postgres de forma dinámica para Local o Web."""
+    # 1. Si estamos en la Web (Streamlit Cloud), usamos st.secrets
     if "DB_HOST" in st.secrets:
         host = st.secrets["DB_HOST"]
         database = st.secrets["DB_NAME"]
         user = st.secrets["DB_USER"]
         password = st.secrets["DB_PASSWORD"]
-    # 2. Si no existen (estamos en tu computadora), leemos el archivo .env local
+    # 2. Si estamos en tu computadora local, usamos el archivo .env o valores por defecto
     else:
         host = os.getenv("DB_HOST", "localhost")
         database = os.getenv("DB_NAME", "avalon_db")
         user = os.getenv("DB_USER", "postgres")
-        password = os.getenv("DB_PASSWORD", "tu_password_local")
+        # Aquí metemos 'baretta' por si tu .env local no lo tiene registrado
+        password = os.getenv("DB_PASSWORD", "baretta") 
 
-    # Ejecutamos la conexión con las variables dinámicas
     return psycopg2.connect(
         host=host,
         database=database,
@@ -32,29 +31,6 @@ def obtener_conexion():
         password=password,
         connect_timeout=3
     )
-
-
-def obtener_conexion():
-    """Establece la conexión central a la base de datos local de Avalon."""
-    # Escudo para evitar que los caracteres de Windows congelen Python
-    
-    
-    host = os.getenv("DB_HOST") or st.secrets.get("DB_HOST")
-    database = os.getenv("DB_NAME") or st.secrets.get("DB_NAME")
-    user = os.getenv("DB_USER") or st.secrets.get("DB_USER")
-    password = os.getenv("DB_PASSWORD") or st.secrets.get("DB_PASSWORD")
-    
-                
-    return psycopg2.connect(
-        host="localhost",
-        database="avalon_db",
-        user="postgres",
-        password="baretta",  # Tu contraseña real local
-        port="5432",
-        connect_timeout=3
-    )
-
-
 
 
 
