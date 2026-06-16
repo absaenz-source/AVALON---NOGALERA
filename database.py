@@ -52,27 +52,30 @@ def guardar_ingreso(tipo_ingreso, fecha_op, folio_ref, origen_cliente, tipo_mone
         print(f"⚠️ Error detallado al guardar ingreso: {e}")
         return False
 
-def obtener_ultimos_ingresos():
-    """Trae el historial renombrando las columnas para que finanzas.py las lea perfecto."""
+
+
+
+def obtener_ultimos_ingresos(ciclo="Ciclo 2026"):
+    """Trae el historial de ingresos filtrado por ciclo incluyendo el ID único."""
+    conn = obtener_conexion()
+    if not conn:
+        return None
     try:
-        conn = obtener_conexion()
+        # Añadimos el id y el filtro del ciclo
         query = """
-            SELECT 
-                fecha AS fecha_op, 
-                tipo_ingreso, 
-                entidad_origen AS origen_cliente, 
-                cuenta_destino, 
-                importe_total AS importe_neto 
+            SELECT id, tipo_ingreso, fecha_op, folio_referencia, origen_cliente, 
+                   tipo_moneda, cuenta_destino, ciclo_productivo, importe_neto, observaciones 
             FROM ingresos 
-            ORDER BY fecha DESC 
-            LIMIT 10;
+            WHERE ciclo_productivo = %s
+            ORDER BY fecha_op DESC, id DESC;
         """
-        df = pd.read_sql(query, conn)
+        df = pd.read_sql(query, conn, params=(ciclo,))
         conn.close()
         return df
     except Exception as e:
-        print(f"⚠️ Error al obtener ingresos: {e}")
+        print(f"Error al obtener últimos ingresos: {e}")
         return None
+
 
 # ==============================================================================
 # 📉 SECCIÓN: EGRESOS
@@ -102,22 +105,29 @@ def guardar_egreso(categoria_egreso, fecha, folio, proveedor_beneficiario, moned
         print(f"❌ Error al guardar el egreso: {e}")
         return False
 
-def obtener_ultimos_egresos():
-    """Trae los últimos 10 egresos usando los nombres de columna reales de Postgres."""
+
+
+def obtener_ultimos_egresos(ciclo="Ciclo 2026"):
+    """Trae el historial de egresos filtrado por ciclo incluyendo el ID único."""
+    conn = obtener_conexion()
+    if not conn:
+        return None
     try:
-        conn = obtener_conexion()
         query = """
-            SELECT fecha, categoria_egreso, proveedor_beneficiario, cuenta_origen, importe_total 
+            SELECT id, categoria_egreso, fecha, folio, proveedor_beneficiario, 
+                   moneda, cuenta_origen, ciclo_productivo, importe_total, observaciones 
             FROM egresos 
-            ORDER BY id DESC 
-            LIMIT 10;
+            WHERE ciclo_productivo = %s
+            ORDER BY fecha DESC, id DESC;
         """
-        df = pd.read_sql(query, conn)
+        df = pd.read_sql(query, conn, params=(ciclo,))
         conn.close()
         return df
     except Exception as e:
-        print(f"❌ Error al consultar egresos: {e}")
+        print(f"Error al obtener últimos egresos: {e}")
         return None
+
+
 
 # 🔄 PUENTES DE COMPATIBILIDAD
 # Mapeamos los nombres viejos a las funciones nuevas para que app.py no truene al importar
@@ -274,3 +284,315 @@ def guardar_presupuesto(ciclo, concepto, monto):
     except Exception as e:
         print(f"⚠️ Error al guardar presupuesto para {concepto}: {e}")
         return False
+    
+
+
+
+
+def obtener_totales_por_cuenta(ciclo="Ciclo 2026"):
+    """Suma ingresos y egresos por cuenta y calcula totales globales con mapeo estricto."""
+    conn = obtener_conexion() 
+    
+    datos = {
+        "BBVA": {"ingresos": 0.0, "egresos": 0.0},
+        "Efectivo": {"ingresos": 0.0, "egresos": 0.0},
+        "Otras": {"ingresos": 0.0, "egresos": 0.0}, # Cuenta de respaldo para capturar el limbo
+        "total_ingresos_global": 0.0,
+        "total_egresos_global": 0.0
+    }
+    
+    if not conn:
+        return datos
+    
+    try:
+        cur = conn.cursor()
+        
+        # 1. Sumar ingresos por cuenta_destino
+        cur.execute("""
+            SELECT COALESCE(TRIM(cuenta_destino), 'No Especificado'), COALESCE(SUM(importe_total), 0) 
+            FROM ingresos 
+            WHERE ciclo_productivo = %s 
+            GROUP BY cuenta_destino;
+        """, (ciclo,))
+        ingresos_raw = cur.fetchall()
+        
+        # 2. Sumar egresos por cuenta_origen
+        cur.execute("""
+            SELECT COALESCE(TRIM(cuenta_origen), 'No Especificado'), COALESCE(SUM(importe_total), 0) 
+            FROM egresos 
+            WHERE ciclo_productivo = %s 
+            GROUP BY cuenta_origen;
+        """, (ciclo,))
+        egresos_raw = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        
+        # Procesar Ingresos
+        for cuenta, total in ingresos_raw:
+            valor = float(total)
+            datos["total_ingresos_global"] += valor
+            
+            nombre_limpio = cuenta.lower()
+            if "bbva" in nombre_limpio or "6658" in nombre_limpio:
+                datos["BBVA"]["ingresos"] += valor
+            elif "efectivo" in nombre_limpio or "efec" in nombre_limpio:
+                datos["Efectivo"]["ingresos"] += valor
+            else:
+                datos["Otras"]["ingresos"] += valor # Captura nombres extraños
+                
+        # Procesar Egresos
+        for cuenta, total in egresos_raw:
+            valor = float(total)
+            datos["total_egresos_global"] += valor
+            
+            nombre_limpio = cuenta.lower()
+            if "bbva" in nombre_limpio or "6658" in nombre_limpio:
+                datos["BBVA"]["egresos"] += valor
+            elif "efectivo" in nombre_limpio or "efec" in nombre_limpio:
+                datos["Efectivo"]["egresos"] += valor
+            else:
+                datos["Otras"]["egresos"] += valor
+                
+        return datos
+        
+    except Exception as e:
+        print(f"Error al obtener totales por cuenta: {e}")
+        return datos
+
+
+def obtener_gastos_por_categoria(ciclo="Ciclo 2026"):
+    """Trae el desglose real de egresos acumulados por categoría."""
+    conn = obtener_conexion()
+    if not conn:
+        return {}
+    
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT categoria_egreso, COALESCE(SUM(importe_total), 0) AS total
+            FROM egresos
+            WHERE ciclo_productivo = %s
+            GROUP BY categoria_egreso
+            ORDER BY total DESC;
+        """, (ciclo,))
+        
+        filas = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        # Convertir a un diccionario clásico { "Insumos": 5000.00, ... }
+        return {cat: float(total) for cat, total in filas}
+        
+    except Exception as e:
+        print(f"Error al obtener gastos por categoría: {e}")
+        return {}
+
+
+def eliminar_registro_db(tabla, id_registro):
+    """Elimina un registro específico por su ID en la tabla indicada (ingresos o egresos)."""
+    conn = obtener_conexion()
+    if not conn:
+        return False
+    try:
+        cur = conn.cursor()
+        # Asegúrate de que tu columna llave primaria en Postgres se llame 'id'
+        cur.execute(f"DELETE FROM {tabla} WHERE id = %s;", (id_registro,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error al eliminar en la tabla {tabla}: {e}")
+        return False
+
+def actualizar_ingreso_db(id_registro, datos_nuevos):
+    """Actualiza las columnas modificadas de un ingreso específico."""
+    conn = obtener_conexion()
+    if not conn or not datos_nuevos:
+        return False
+    try:
+        cur = conn.cursor()
+        for columna, valor in datos_nuevos.items():
+            # Construcción dinámica segura para actualizar solo lo que cambió
+            cur.execute(f"UPDATE ingresos SET {columna} = %s WHERE id = %s;", (valor, id_registro))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error al actualizar ingreso: {e}")
+        return False
+
+def actualizar_egreso_db(id_registro, datos_nuevos):
+    """Actualiza las columnas modificadas de un egreso específico."""
+    conn = obtener_conexion()
+    if not conn or not datos_nuevos:
+        return False
+    try:
+        cur = conn.cursor()
+        for columna, valor in datos_nuevos.items():
+            cur.execute(f"UPDATE egresos SET {columna} = %s WHERE id = %s;", (valor, id_registro))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error al actualizar egreso: {e}")
+        return False
+    
+    
+
+
+def crear_tablas_catalogos_faltantes():
+    """Crea las tablas de contactos (clientes/proveedores) y cuentas si no existen."""
+    conn = obtener_conexion()
+    if not conn: return
+    try:
+        cur = conn.cursor()
+        # 1. Tabla de Contactos (Clientes y Proveedores)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS contactos (
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(150) NOT NULL,
+                tipo VARCHAR(20) NOT NULL, -- 'CLIENTE', 'PROVEEDOR', 'AMBOS'
+                rfc VARCHAR(13),
+                telefono VARCHAR(20),
+                observaciones TEXT
+            );
+        """)
+        # 2. Tabla de Cuentas Bancarias / Efectivo
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS cuentas_bancarias (
+                id SERIAL PRIMARY KEY,
+                nombre_cuenta VARCHAR(100) NOT NULL, -- 'BBVA', 'SANTANDER', 'EFECTIVO CHICA', etc.
+                institucion VARCHAR(100),            -- 'BBVA', 'Santander', 'Caja Fuerte'
+                tipo_cuenta VARCHAR(30),             -- 'DEBITO', 'CREDITO', 'EFECTIVO'
+                divisa VARCHAR(10) DEFAULT 'MXN'     -- 'MXN', 'USD'
+            );
+        """)
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error al crear tablas de catálogos: {e}")
+
+# Funciones para el Catálogo de Contactos
+def guardar_contacto(nombre, tipo, rfc, telefono, observaciones):
+    conn = obtener_conexion()
+    if not conn: return False
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO contactos (nombre, tipo, rfc, telefono, observaciones)
+            VALUES (%s, %s, %s, %s, %s);
+        """, (nombre.upper().strip(), tipo, rfc.upper().strip(), telefono, observaciones))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error al guardar contacto: {e}")
+        return False
+
+# Funciones para el Catálogo de Cuentas
+def guardar_cuenta_bancaria(nombre_cuenta, institucion, tipo_cuenta, divisa):
+    conn = obtener_conexion()
+    if not conn: return False
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO cuentas_bancarias (nombre_cuenta, institucion, tipo_cuenta, divisa)
+            VALUES (%s, %s, %s, %s);
+        """, (nombre_cuenta.upper().strip(), institucion.upper().strip(), tipo_cuenta, divisa))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error al guardar cuenta bancaria: {e}")
+        return False
+    
+    
+import pandas as pd # Asegúrate de que esté importado al inicio de database.py
+
+def insertar_cliente(nombre, rfc, telefono):
+    """Inserta un nuevo cliente en la base de datos."""
+    conn = obtener_conexion() # Usa la función de conexión que tengas en tu archivo
+    if not conn: return False
+    try:
+        cur = conn.cursor()
+        # Asegúrate de tener una tabla llamada 'clientes' o créala en Postgres si hace falta
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS clientes (
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(150) NOT NULL,
+                rfc VARCHAR(13),
+                telefono VARCHAR(20),
+                fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        cur.execute("""
+            INSERT INTO clientes (nombre, rfc, telefono) 
+            VALUES (%s, %s, %s);
+        """, (nombre.upper().strip(), rfc.upper().strip(), telefono.strip()))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error al insertar cliente: {e}")
+        return False
+
+def consultar_clientes():
+    """Devuelve un DataFrame con todos los clientes registrados."""
+    conn = obtener_conexion()
+    if not conn: return None
+    try:
+        query = "SELECT nombre, rfc, telefono, fecha_registro FROM clientes ORDER BY nombre ASC;"
+        df = pd.read_sql(query, conn)
+        conn.close()
+        return df
+    except Exception as e:
+        print(f"Error al consultar clientes: {e}")
+        return None
+
+def insertar_cuenta_bancaria(nombre_cuenta, banco, tipo_cuenta):
+    """Inserta una nueva cuenta o fondo de caja."""
+    conn = obtener_conexion()
+    if not conn: return False
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS cuentas_bancarias (
+                id SERIAL PRIMARY KEY,
+                nombre_cuenta VARCHAR(100) NOT NULL,
+                banco VARCHAR(100) NOT NULL,
+                tipo_cuenta VARCHAR(50),
+                fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        cur.execute("""
+            INSERT INTO cuentas_bancarias (nombre_cuenta, banco, tipo_cuenta) 
+            VALUES (%s, %s, %s);
+        """, (nombre_cuenta.upper().strip(), banco.upper().strip(), tipo_cuenta))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error al insertar cuenta: {e}")
+        return False
+
+def consultar_cuentas_bancarias():
+    """Devuelve un DataFrame con las cuentas activas."""
+    conn = obtener_conexion()
+    if not conn: return None
+    try:
+        query = "SELECT nombre_cuenta, banco, tipo_cuenta FROM cuentas_bancarias ORDER BY nombre_cuenta ASC;"
+        df = pd.read_sql(query, conn)
+        conn.close()
+        return df
+    except Exception as e:
+        print(f"Error al consultar cuentas: {e}")
+        return None

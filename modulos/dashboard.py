@@ -1,148 +1,104 @@
 import streamlit as st
-import datetime
-from database import consultar_proveedores  # Mantenemos tu import real
+import pandas as pd
+from database import obtener_totales_por_cuenta, obtener_gastos_por_categoria
 
 def mostrar_dashboard():
-    
-    
+    # Reducción de espacios superiores para estética en el tablero principal
     st.markdown("""
-    <style>
-        /* Reduce el espacio muerto superior del contenedor principal */
-        .block-container {
-            padding-top: 1.5rem !important;
-            padding-bottom: 1rem !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
+        <style>
+            .block-container {
+                padding-top: 1.5rem !important;
+                padding-bottom: 1rem !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
     
-    
-    
-    st.title("📊 Panel de Control")
-    st.markdown("Gestión de ciclos, saldos y estimación de utilidad para **Nogalera Los Mezquites**")
+    st.title("📊 Resumen Ejecutivo del Ciclo Activo")
+    st.write("Cifras consolidadas en tiempo real basadas en tus registros de Postgres.")
     st.markdown("---")
     
-    # =========================================================
-    # BLOQUE 1: PALANCAS Y FILTROS (Entradas del usuario)
-    # =========================================================
-    st.subheader("⚙️ Parámetros del Ciclo Operativo")
+    # 1. TRAER DATOS REALES DE LA BASE DE DATOS (Fijo a Ciclo 2026 temporalmente)
+    # Nota: Aquí es donde resolveremos el desfase de sumatorias analizando qué devuelve Postgres
+    flujo_cuentas = obtener_totales_por_cuenta("Ciclo 2026")
+    gastos_reales = obtener_gastos_por_categoria("Ciclo 2026")
     
-    col_fecha, col_kilos, col_precio = st.columns(3)
-    
-    with col_fecha:
-        # Filtro de periodo (Por defecto el año en curso)
-        hoy = datetime.date.today()
-        fecha_inicio = datetime.date(hoy.year, 1, 1)
-        fecha_fin = datetime.date(hoy.year, 12, 31)
-        
-        periodo = st.date_input(
-            "Periodo del Ciclo:",
-            value=(fecha_inicio, fecha_fin),
-            format="DD/MM/YYYY"
-        )
-        
-    with col_kilos:
-        # Estimación de cosecha en kg
-        kilos_esperados = st.number_input(
-            "Cosecha Estimada (Kg):", 
-            min_value=0, 
-            value=15000, 
-            step=1000
-        )
-        
-    with col_precio:
-        # Precio esperado por kilo
-        precio_esperado = st.number_input(
-            "Precio Esperado por Kg (MXN):", 
-            min_value=0.0, 
-            value=85.0, 
-            step=5.0
-        )
+    # Sumatorias globales directas de Postgres
+    total_ingresos_real = flujo_cuentas.get("total_ingresos_global", 0.0)
+    total_egresado_real = flujo_cuentas.get("total_egresos_global", 0.0)
+    saldo_calculado_real = total_ingresos_real - total_egresado_real
 
-    # =========================================================
-    # LÓGICA MATEMÁTICA (Simulación con datos temporales)
-    # =========================================================
-    # 1. Ingreso Bruto Estimado
-    ingreso_estimado = kilos_esperados * precio_esperado
+    # Extraer flujos específicos para el desglose de cuentas de manera segura
+    ingresos_bbva = flujo_cuentas.get("BBVA", {}).get("ingresos", 0.0)
+    egresos_bbva = flujo_cuentas.get("BBVA", {}).get("egresos", 0.0)
+    ingresos_efectivo = flujo_cuentas.get("Efectivo", {}).get("ingresos", 0.0)
+    egresos_efectivo = flujo_cuentas.get("Efectivo", {}).get("egresos", 0.0)
     
-    # 2. Datos simulados de gastos reales extraídos de tus 10 conceptos
-    # (En el siguiente paso los jalaremos con queries SUM(monto) WHERE concepto = 'X')
-    gastos_reales_totales = 45000.00  # Ejemplo: lo que ya se pagó en el periodo
-    gastos_estimados_restantes = 120000.00  # Ejemplo: lo presupuestado para el resto del ciclo
+    # 2. SECCIÓN DE GRANDES TOTALES
+    st.markdown("### 📈 Balance Consolidado del Ciclo")
+    col_tot_ing, col_tot_egr, col_tot_sal = st.columns(3)
     
-    egreso_proyectado_total = gastos_reales_totales + gastos_estimados_restantes
-    utilidad_proyectada = ingreso_estimado - egreso_proyectado_total
-    
-    # 3. Saldos actuales (Efectivo + Bancos)
-    saldo_bancos = 85400.00   # Simulación temporal
-    saldo_efectivo = 12500.00 # Simulación temporal
-    liquidez_total = saldo_bancos + saldo_efectivo
-
-    # =========================================================
-    # BLOQUE 2: TARJETAS DE PROYECCIÓN Y LIQUIDEZ
-    # =========================================================
-    
-    # =========================================================
-    # BLOQUE 2: TARJETAS DE PROYECCIÓN Y LIQUIDEZ
-    # =========================================================
+    with col_tot_ing:
+        st.metric(label="🟢 TOTAL INGRESOS REGISTRADOS", value=f"${total_ingresos_real:,.2f}")
+    with col_tot_egr:
+        st.metric(label="🔴 TOTAL EGRESOS REALES", value=f"${total_egresado_real:,.2f}")
+    with col_tot_sal:
+        st.metric(label="💰 SALDO NETO EN SISTEMA", value=f"${saldo_calculado_real:,.2f}")
+        
     st.markdown("---")
-    st.subheader("📈 Proyección Financiera del Ciclo")
     
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.metric(
-            label="💰 Ingreso Bruto Estimado", 
-            value=f"${ingreso_estimado:,.0f}"
-        )
-    with c2:
-        st.metric(
-            label="📉 Egreso Proyectado Total", 
-            value=f"${egreso_proyectado_total:,.0f}", 
-            delta=f"Real: ${gastos_reales_totales:,.0f}", 
-            delta_color="inverse"
-        )
-    with c3:
-        # Color verde si hay ganancia, rojo si no
-        color_utilidad = "🟢" if utilidad_proyectada >= 0 else "🔴"
-        st.metric(
-            label=f"{color_utilidad} Utilidad Neta Proyectada", 
-            value=f"${utilidad_proyectada:,.2f}"
-        )
-
-    # Fila de Saldos Actuales
-    st.markdown("### 🏦 Disponibilidad de Efectivo (Liquidez)")
-    sb1, sb2, sb3 = st.columns(3)
-    with sb1:
-        st.caption(f"**Bancos:** ${saldo_bancos:,.2f}")
-    with sb2:
-        st.caption(f"**Efectivo / Caja:** ${saldo_efectivo:,.2f}")
-    with sb3:
-        st.markdown(f"**Disponible Total:** `${liquidez_total:,.2f}`")
+    # Variables de proyección (Cuentas por pagar y estimaciones de Nuez)
+    cuentas_por_pagar = 62400.00
+    volumen_estimado = 12000.00  
+    precio_esperado = 90.00      
+    valor_produccion = volumen_estimado * precio_esperado
     
-
-    # =========================================================
-    # BLOQUE 3: EL DESGLOSE DE LOS 10 CONCEPTOS
-    # =========================================================
-    st.markdown("---")
-    st.subheader("📋 Desglose de Egresos por Concepto")
-    st.markdown("Monitoreo de tus 10 conceptos clave frente al estimado del ciclo:")
-
-    # Lista de tus conceptos oficiales
-    conceptos = [
-        "CFE", "GASOLINA", "VIÁTICOS", "MANTENIMIENTO", "INSUMOS", 
-        "SUELDOS", "RENTA MAQUINARIA", "COSECHA", "CONTABILIDAD", "ASESORÍA"
-    ]
+    # 3. COLUMNAS DE DESGLOSE INTERNO
+    col_saldos, col_gastos, col_produccion = st.columns([1.2, 1.1, 1.2])
     
-    # Generamos la tabla visual para cada concepto
-    for con in conceptos:
-        # Columnas para simular el avance de cada gasto
-        col_name, col_progreso, col_num = st.columns([2, 3, 2])
+    with col_saldos:
+        st.markdown("### 🏦 Flujo por Cuentas")
+        saldo_bbva = ingresos_bbva - egresos_bbva
+        st.metric(label="💳 BBVA (Saldo Real)", value=f"${saldo_bbva:,.2f}")
         
-        with col_name:
-            st.markdown(f"**{con}**")
-            
-        with col_progreso:
-            # Barra de progreso visual (Simulada al 30% de uso para el ejemplo)
-            st.progress(0.30)
-            
-        with col_num:
-            st.caption("Real: `$3,000` | Restante: `$7,000`")
+        saldo_efectivo = ingresos_efectivo - egresos_efectivo
+        st.metric(label="💵 Efectivo (Saldo Real)", value=f"${saldo_efectivo:,.2f}")
+        
+        # Cuenta de respaldo Santander u otras
+        ingresos_otras = flujo_cuentas.get("Otras", {}).get("ingresos", 0.0)
+        egresos_otras = flujo_cuentas.get("Otras", {}).get("egresos", 0.0)
+        saldo_otras = ingresos_otras - egresos_otras
+        
+        if saldo_otras != 0:
+            st.metric(label="🏦 Otras Cuentas / No Clasificado", value=f"${saldo_otras:,.2f}", help="Registros con nombres antiguos o de otras instituciones")
+        
+        st.markdown("---")
+        st.metric(label="⚠️ Cuentas por Pagar", value=f"${cuentas_por_pagar:,.2f}", delta=f"-${cuentas_por_pagar:,.2f}", delta_color="inverse")
+        
+        balance_final = saldo_calculado_real - cuentas_por_pagar
+        st.subheader(f"⚖️ Balance Final: ${balance_final:,.2f}")
+    
+    with col_gastos:
+        st.markdown("### 📉 Detalle por Categoría")
+        st.write("Desglose acumulado:")
+        
+        if gastos_reales:
+            for g_concepto, g_importe in gastos_reales.items():
+                st.markdown(f"**{g_concepto}:** ${g_importe:,.2f}")
+        else:
+            st.info("No hay egresos registrados en este ciclo todavía.")
+
+    with col_produccion:
+        st.markdown("### 🚜 Proyecciones de Producción")
+        st.metric(label="📦 Volumen Esperado", value=f"{volumen_estimado:,.0f} Kg")
+        st.metric(label="🏷️ Precio Esperado / Kg", value=f"${precio_esperado:,.2f}")
+        st.metric(label="💎 Valor de Cosecha", value=f"${valor_produccion:,.2f}", delta=f"+${valor_produccion:,.2f}")
+        
+        st.markdown("---")
+        st.markdown("### 🏁 Proyección Final")
+        saldo_final_proyectado = saldo_calculado_real + valor_produccion
+        
+        st.metric(
+            label="🚀 SALDO FINAL ESTIMADO", 
+            value=f"${saldo_final_proyectado:,.2f}",
+            delta=f"${saldo_final_proyectado - saldo_calculado_real:,.2f} vs Actual"
+        )

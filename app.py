@@ -10,6 +10,9 @@ from modulos.catalogos import mostrar_catalogos
 from modulos.dashboard import mostrar_dashboard
 from modulos.finanzas import mostrar_finanzas
 
+
+#crear_tablas_catalogos_faltantes()
+
 # Ejecutamos la función para que revise y si no existe la tabla, la cree en Neon/Localhost
 crear_tabla_presupuestos()
 

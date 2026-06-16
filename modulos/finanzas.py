@@ -7,7 +7,13 @@ from database import (
     guardar_ingreso, 
     obtener_ultimos_ingresos, 
     guardar_egreso, 
-    obtener_ultimos_egresos
+    obtener_ultimos_egresos,
+    obtener_totales_por_cuenta,
+    obtener_gastos_por_categoria,
+    eliminar_registro_db,      # <-- Nueva
+    actualizar_ingreso_db,     # <-- Nueva
+    actualizar_egreso_db
+     
 )
 
 def mostrar_finanzas():
@@ -26,7 +32,7 @@ def mostrar_finanzas():
     st.write("Registra y audita los movimientos económicos etiquetados por ciclo productivo.")
 
     # Creamos las 3 pestañas principales
-    tab1, tab2, tab3 = st.tabs(["💰 Registrar Ingreso", "📉 Registrar Egreso", "📊 Análisis y Reportes"])
+    tab1, tab2, = st.tabs(["💰 Registrar Ingreso", "📉 Registrar Egreso"])
     
     # =========================================================================
     # 💰 PESTAÑA 1: REGISTRAR INGRESO
@@ -45,7 +51,8 @@ def mostrar_finanzas():
         
         with c2:
             tipo_moneda = st.selectbox("Tipo de Moneda", ["MXN", "USD"], key="fin_ing_moneda_sel")
-            cuenta_destino = st.selectbox("Cuenta de Destino (Entrada)", ["BBVA - 5555 (Operativa)", "Santander - 1234", "Caja Chica"], key="fin_ing_cuenta_sel")
+            # HOMOLOGADO: Nombres limpios coincidentes con egresos
+            cuenta_destino = st.selectbox("Cuenta de Destino (Entrada)", ["BBVA", "SANTANDER", "EFECTIVO"], key="fin_ing_cuenta_sel")
             ciclo_produc = st.selectbox("Ciclo Productivo Imputable", ["Ciclo 2026", "Ciclo 2025"], key="fin_ing_ciclo_sel")
         
         # Lógica dinámica para cálculo de Nuez / Entrada General
@@ -79,23 +86,63 @@ def mostrar_finanzas():
                     st.error("❌ Error al conectar con la base de datos.")
             else:
                 st.warning("⚠️ El importe debe ser mayor a $0.00 para poder registrarse.")
-                    
-        # --- TABLA DE HISTORIAL DE INGRESOS ---
+           
+        
+        
+        
+        # --- TABLA DE HISTORIAL DE INGRESOS EDITABLE ---
         st.markdown("---")
-        st.subheader("📜 Últimos Movimientos de Ingresos")
-        df_ingresos = obtener_ultimos_ingresos()
+        st.subheader("📜 Historial de Ingresos (Editable)")
+        st.caption("💡 Haz doble clic en cualquier celda para modificar. Para borrar, selecciona la fila completa del lado izquierdo y presiona la tecla 'Supr' o 'Delete' en tu teclado, luego dale al botón Guardar Cambios.")
+        
+        df_ingresos = obtener_ultimos_ingresos("Ciclo 2026")
+        
         if df_ingresos is not None and not df_ingresos.empty:
-            st.dataframe(
+            # st.data_editor habilita la edición interactiva
+            ingresos_editados = st.data_editor(
                 df_ingresos,
+                num_rows="dynamic", # Permite eliminar filas seleccionándolas
+                disabled=["id"],    # Bloqueamos el ID para que no se pueda alterar
                 column_config={
                     "importe_neto": st.column_config.NumberColumn("Importe", format="$%,.2f"),
                     "fecha_op": st.column_config.DateColumn("Fecha"),
                 },
-                use_container_width=True
+                use_container_width=True,
+                key="editor_ingresos_key"
             )
+            
+            # Botón para procesar los cambios hechos en la tabla
+            if st.button("💾 Guardar Cambios en Ingresos", key="btn_save_ing"):
+                cambios = st.session_state["editor_ingresos_key"]
+                exito_total = True
+                
+                # 1. Procesar filas eliminadas
+                if cambios["deleted_rows"]:
+                    for indice_fila in cambios["deleted_rows"]:
+                        id_a_borrar = df_ingresos.iloc[indice_fila]["id"]
+                        if not eliminar_registro_db("ingresos", int(id_a_borrar)):
+                            exito_total = False
+                
+                # 2. Procesar filas modificadas
+                if cambios["edited_rows"]:
+                    for indice_fila, columnas_cambiadas in cambios["edited_rows"].items():
+                        id_a_editar = df_ingresos.iloc[int(indice_fila)]["id"]
+                        if not actualizar_ingreso_db(int(id_a_editar), columnas_cambiadas):
+                            exito_total = False
+                            
+                if exito_total:
+                    st.success("✅ ¡Base de datos de Ingresos actualizada correctamente!")
+                    st.rerun()
+                else:
+                    st.error("❌ Hubo un detalle al intentar guardar algunos cambios.")
         else:
-            st.info("💡 No hay registros de ingresos detectados en este ciclo.")
-
+            st.info("💡 No hay registros de ingresos detectados en este ciclo.")   
+           
+           
+           
+                    
+           
+          
     # =========================================================================
     # 📉 PESTAÑA 2: REGISTRAR EGRESO
     # =========================================================================
@@ -104,7 +151,7 @@ def mostrar_finanzas():
         
         conceptos_gastos = [
             "INSUMOS", "COSECHA", "SUELDOS", "CFE", 
-            "RENTAL MAQUINARIA", "MANTENIMIENTO", 
+            "RENTA MAQUINARIA", "MANTENIMIENTO", 
             "GASOLINA Y VIÁTICOS", "CONTABILIDAD", "ASESORÍA"
         ]
         concepto_seleccionado = st.selectbox("📉 Concepto del Gasto", conceptos_gastos, key="fin_egr_concepto_sel")
@@ -117,7 +164,8 @@ def mostrar_finanzas():
             
         with ce2:
             moneda_egreso = st.selectbox("Tipo de Moneda", ["MXN", "USD"], key="fin_egr_moneda_sel")
-            cuenta_origen = st.selectbox("Cuenta de Origen (Salida)", ["BBVA - 6658", "EFECTIVO"], key="fin_egr_cuenta_sel")
+            # HOMOLOGADO: Coincide perfectamente con los ingresos
+            cuenta_origen = st.selectbox("Cuenta de Origen (Salida)", ["BBVA", "SANTANDER", "EFECTIVO"], key="fin_egr_cuenta_sel")
             ciclo_egreso = st.selectbox("Ciclo Productivo Imputable", ["Ciclo 2026", "Ciclo 2025"], key="fin_egr_ciclo_sel")
             
         ce3, ce4 = st.columns(2)
@@ -149,86 +197,54 @@ def mostrar_finanzas():
                     st.error("❌ Error al conectar con Postgres para guardar el egreso.")
             else:
                 st.warning("⚠️ El importe del gasto debe ser mayor a $0.00.")
-                
-        # --- TABLA DE HISTORIAL DE EGRESOS ---
+         
+        # --- TABLA DE HISTORIAL DE EGRESOS EDITABLE ---
         st.markdown("---")
-        st.subheader("📜 Últimos Movimientos de Egresos")
+        st.subheader("📜 Historial de Egresos (Editable)")
+        st.caption("💡 Haz doble clic en cualquier celda para modificar. Para borrar, selecciona la fila completa del lado izquierdo y presiona la tecla 'Supr' o 'Delete' en tu teclado, luego dale al botón Guardar Cambios.")
         
-        # Asignación limpia asegurada para evitar NameError
-        df_egresos = obtener_ultimos_egresos()
+        df_egresos = obtener_ultimos_egresos("Ciclo 2026")
         
         if df_egresos is not None and not df_egresos.empty:
-            st.dataframe(
+            egresos_editados = st.data_editor(
                 df_egresos,
+                num_rows="dynamic",
+                disabled=["id"],
                 column_config={
                     "importe_total": st.column_config.NumberColumn("Importe", format="$%,.2f"),
                     "fecha": st.column_config.DateColumn("Fecha"),
                 },
-                use_container_width=True
+                use_container_width=True,
+                key="editor_egresos_key"
             )
+            
+            if st.button("💾 Guardar Cambios en Egresos", key="btn_save_egr"):
+                cambios = st.session_state["editor_egresos_key"]
+                exito_total = True
+                
+                # 1. Procesar filas eliminadas
+                if cambios["deleted_rows"]:
+                    for indice_fila in cambios["deleted_rows"]:
+                        id_a_borrar = df_egresos.iloc[indice_fila]["id"]
+                        if not eliminar_registro_db("egresos", int(id_a_borrar)):
+                            exito_total = False
+                
+                # 2. Procesar filas modificadas
+                if cambios["edited_rows"]:
+                    for indice_fila, columnas_cambiadas in cambios["edited_rows"].items():
+                        id_a_editar = df_egresos.iloc[int(indice_fila)]["id"]
+                        if not actualizar_egreso_db(int(id_a_editar), columnas_cambiadas):
+                            exito_total = False
+                            
+                if exito_total:
+                    st.success("✅ ¡Base de datos de Egresos actualizada correctamente!")
+                    st.rerun()
+                else:
+                    st.error("❌ Hubo un detalle al intentar guardar algunos cambios.")
         else:
-            st.info("💡 No hay registros de egresos detectados en este ciclo.")      
-
+            st.info("💡 No hay registros de egresos detectados en este ciclo.") 
+         
+         
     # =========================================================================
     # 📊 PESTAÑA 3: ANÁLISIS Y REPORTES
     # =========================================================================
-    with tab3:
-        st.subheader("📊 Resumen Ejecutivo del Ciclo Activo")
-        st.write("Cifras consolidadas basados en operaciones y estimaciones actuales.")
-        st.markdown("---")
-        
-        ingresos_bbva, egresos_bbva = 2455989.00, 2250267.00
-        ingresos_efectivo, egresos_efectivo = 363000.00, 360000.00
-        cuentas_por_pagar = 62400.00
-        
-        volumen_estimado = 12000.00  
-        precio_esperado = 90.00      
-        valor_produccion = volumen_estimado * precio_esperado
-        gastos_proyectados = 1011000.00 
-        
-        col_saldos, col_gastos, col_produccion = st.columns([1.2, 1.1, 1.2])
-        
-        with col_saldos:
-            st.markdown("### 🏦 Flujo por Cuentas")
-            saldo_bbva = ingresos_bbva - egresos_bbva
-            st.metric(label="💳 BBVA - 6658 (Saldo)", value=f"${saldo_bbva:,.2f}")
-            
-            saldo_efectivo = ingresos_efectivo - egresos_efectivo
-            st.metric(label="💵 Efectivo (Saldo)", value=f"${saldo_efectivo:,.2f}")
-            
-            st.markdown("---")
-            saldo_actual_total = saldo_bbva + saldo_efectivo
-            st.metric(label="💰 SALDO TOTAL ACTUAL", value=f"${saldo_actual_total:,.2f}")
-            st.metric(label="⚠️ Cuentas por Pagar", value=f"${cuentas_por_pagar:,.2f}", delta=f"-${cuentas_por_pagar:,.2f}", delta_color="inverse")
-            
-            balance_final = saldo_actual_total - cuentas_por_pagar
-            st.subheader(f"⚖️ Balance: ${balance_final:,.2f}")
-
-        with col_gastos:
-            st.markdown("### 📉 Gastos del Ciclo")
-            st.metric(label="💸 Total Egresado Proyectado", value=f"${gastos_proyectados:,.2f}")
-            st.markdown("---")
-            
-            gastos_mock = {
-                "CFE": 100000.00, "Gasolina/Viáticos": 5000.00, "Mantenimiento": 30000.00,
-                "Insumos": 500000.00, "Sueldos": 135000.00, "Renta Maquinaria": 50000.00,
-                "Cosecha": 150000.00, "Contabilidad": 6000.00, "Asesoría": 35000.00
-            }
-            for g_concepto, g_importe in gastos_mock.items():
-                st.markdown(f"**{g_concepto}:** ${g_importe:,.2f}")
-
-        with col_produccion:
-            st.markdown("### 🚜 Producción Estimada")
-            st.metric(label="📦 Volumen Esperado", value=f"{volumen_estimado:,.0f} Kg")
-            st.metric(label="🏷️ Precio Esperado / Kg", value=f"${precio_esperado:,.2f}")
-            st.metric(label="💎 Valor de Cosecha", value=f"${valor_produccion:,.2f}", delta=f"+${valor_produccion:,.2f}")
-            
-            st.markdown("---")
-            st.markdown("### 🏁 Proyección Final")
-            saldo_final_proyectado = saldo_actual_total + valor_produccion - gastos_proyectados
-            
-            st.metric(
-                label="🚀 SALDO FINAL ESTIMADO", 
-                value=f"${saldo_final_proyectado:,.2f}",
-                delta=f"${saldo_final_proyectado - saldo_actual_total:,.2f} vs Actual"
-            )
