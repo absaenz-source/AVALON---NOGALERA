@@ -2,17 +2,18 @@ import psycopg2
 import sys
 import streamlit as st
 import pandas as pd
+import os
 
 def obtener_conexion():
     """Establece la conexión central a la base de datos local de Avalon."""
     # Escudo para evitar que los caracteres de Windows congelen Python
-    if sys.platform == 'win32':
-        import codecs
-        try:
-            codecs.lookup('cp65001')
-        except LookupError:
-            codecs.register(lambda name: codecs.lookup('utf-8') if name == 'cp65001' else None)
-            
+        
+    host = os.getenv("DB_HOST") or st.secrets.get("DB_HOST")
+    database = os.getenv("DB_NAME") or st.secrets.get("DB_NAME")
+    user = os.getenv("DB_USER") or st.secrets.get("DB_USER")
+    password = os.getenv("DB_PASSWORD") or st.secrets.get("DB_PASSWORD")
+    
+                
     return psycopg2.connect(
         host="localhost",
         database="avalon_db",
