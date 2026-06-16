@@ -1,13 +1,44 @@
+import os
 import psycopg2
 import sys
 import streamlit as st
 import pandas as pd
-import os
+from dotenv import load_dotenv
+
+
+# Cargar el archivo .env por si acaso estás en local
+load_dotenv()
+
+def obtener_conexion():
+    """Establece la conexión a Postgres de forma dinámica para Local o Web."""
+    # 1. Intentamos leer los Secrets de Streamlit Cloud (Si estamos en la Web)
+    if "DB_HOST" in st.secrets:
+        host = st.secrets["DB_HOST"]
+        database = st.secrets["DB_NAME"]
+        user = st.secrets["DB_USER"]
+        password = st.secrets["DB_PASSWORD"]
+    # 2. Si no existen (estamos en tu computadora), leemos el archivo .env local
+    else:
+        host = os.getenv("DB_HOST", "localhost")
+        database = os.getenv("DB_NAME", "avalon_db")
+        user = os.getenv("DB_USER", "postgres")
+        password = os.getenv("DB_PASSWORD", "tu_password_local")
+
+    # Ejecutamos la conexión con las variables dinámicas
+    return psycopg2.connect(
+        host=host,
+        database=database,
+        user=user,
+        password=password,
+        connect_timeout=3
+    )
+
 
 def obtener_conexion():
     """Establece la conexión central a la base de datos local de Avalon."""
     # Escudo para evitar que los caracteres de Windows congelen Python
-        
+    
+    
     host = os.getenv("DB_HOST") or st.secrets.get("DB_HOST")
     database = os.getenv("DB_NAME") or st.secrets.get("DB_NAME")
     user = os.getenv("DB_USER") or st.secrets.get("DB_USER")
@@ -22,6 +53,17 @@ def obtener_conexion():
         port="5432",
         connect_timeout=3
     )
+
+
+
+
+
+
+
+
+
+
+
 
 # ==============================================================================
 # 💰 SECCIÓN: INGRESOS
