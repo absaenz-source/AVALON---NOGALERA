@@ -34,35 +34,63 @@ st.markdown(
     """
     <style>
 
+<style>
+    /* 1. Fondo principal de la app y textos generales */
+    .stApp {
+        background-color: #F8F9FA !important;
+        color: #212529 !important;
+    }
+    h1, h2, h3, h4, h5, h6, p, span, label {
+        color: #212529 !important;
+    }
+    div[data-testid="stMetricValue"], div[data-testid="marker-cluster"] {
+        color: #212529 !important;
+    }
 
+    /* 2. Fondo de la barra lateral */
+    section[data-testid="stSidebar"] {
+        background-color: #F1F3F5 !important;
+        border-right: 1px solid #E0E0E0 !important;
+    }
 
-        /* Ajuste para la barra lateral (Sidebar) */
-section[data-testid="stSidebar"] {
-    background-color: #F8F9FA !important; /* Un gris muy sutil para que contraste con el fondo blanco de la app */
-    border-right: 1px solid #E0E0E0;
-}
+    /* 3. CONTROL TOTAL DEL MENÚ LATERAL (Texto negro/oscuro de alta legibilidad) */
+    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] span {
+        color: #1A252F !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+    }
 
-/* Forzar contraste alto en los textos del menú lateral (Dashboard, Finanzas, Catálogos) */
-section[data-testid="stSidebar"] span, 
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] label,
-section[data-testid="stSidebar"] a {
-    color: #2C3E50 !important; /* Gris oscuro corporativo de alta legibilidad */
-    font-weight: 600 !important; /* Le da un poco más de cuerpo a la letra */
-}
+    /* Asegurar los textos en cualquier otro contenedor del sidebar */
+    section[data-testid="stSidebar"] .st-emotion-cache-6q9sum e1nzilw11 {
+        color: #1A252F !important;
+    }
 
-/* Forzar que los íconos del menú también se oscurezcan y tengan contraste */
-section[data-testid="stSidebar"] svg {
-    fill: #2C3E50 !important;
-    color: #2C3E50 !important;
-}
+    /* 4. Íconos del menú lateral en color oscuro */
+    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] svg {
+        fill: #1A252F !important;
+        color: #1A252F !important;
+    }
 
-/* Cambiar el color cuando pasas el mouse por encima de las opciones (Hover) */
-section[data-testid="stSidebar"] div[data-testid="stSidebarNavLink"]:hover {
-    background-color: #E9ECEF !important;
-    border-radius: 8px;
-}
-        
+    /* 5. Efecto al pasar el mouse por encima de las opciones */
+    section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"]:hover {
+        background-color: #E2E8F0 !important;
+        border-radius: 4px !important;
+    }
+
+    /* 6. Forzar visibilidad del botón para encoger/expandir el menú */
+    button[data-testid="stSidebarCollapseButton"] {
+        background-color: #FFFFFF !important;
+        color: #212529 !important;
+        border: 1px solid #E0E0E0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 999999 !important;
+    }
+    button[data-testid="stSidebarCollapseButton"] svg {
+        fill: #212529 !important;
+        color: #212529 !important;
+    }
+
         
         
         
