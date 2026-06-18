@@ -35,6 +35,26 @@ st.markdown(
     """
     <style>
 
+    /* Forzar que el botón de reapertura sea visible, oscuro y clickeable */
+    button[data-testid="stSidebarCollapseButton"] {
+        background-color: #FFFFFF !important;
+        color: #212529 !important;
+        border: 1px solid #E0E0E0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 999999 !important;
+    }
+    /* Asegurar que el icono interno del botón pinte de color oscuro */
+    button[data-testid="stSidebarCollapseButton"] svg {
+        fill: #212529 !important;
+        color: #212529 !important;
+    }
+
+
+
+
+    
+
         /* Asegurar que el botón de expandir la barra lateral sea visible */
    button[data-testid="stSidebarCollapseButton"] {
        color: #212529 !important;
