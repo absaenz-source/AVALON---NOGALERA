@@ -182,25 +182,28 @@ if not ciclos_db:
 # ==============================================================================
 # 4. PANEL LATERAL IZQUIERDO (Navegación limpia)
 # ==============================================================================
+
 with st.sidebar:
     st.image("logo_nogalera.png", use_container_width=True)
     st.markdown("<br>", unsafe_allow_html=True)
     
+    # Inyectamos etiquetas con estilo de color directamente en el texto de las opciones
     opcion_menu = st.radio(
         "Navegación",
         [
-            "Dashboard", 
-            "Finanzas", 
-            "Catálogos"
+            '<span style="color: #111827 !important; font-weight: 700; font-size: 16px;">Dashboard</span>', 
+            '<span style="color: #111827 !important; font-weight: 700; font-size: 16px;">Finanzas</span>', 
+            '<span style="color: #111827 !important; font-weight: 700; font-size: 16px;">Catálogos</span>'
         ],
         label_visibility="collapsed"
     )
     
     st.markdown("""
-        <div style='position: fixed; bottom: 15px; left: 15px; color: #718096; font-size: 11px; font-family: sans-serif;'>
+        <div style='position: fixed; bottom: 15px; left: 15px; color: #4A5568; font-size: 11px; font-family: sans-serif; font-weight: 600;'>
             Nogalera Los Mezquites v1.0
         </div>
     """, unsafe_allow_html=True)
+
 
 # ==============================================================================
 # 5. ÁREA CENTRAL DINÁMICA
