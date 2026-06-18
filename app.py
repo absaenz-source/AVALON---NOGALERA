@@ -33,6 +33,40 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+
+
+
+        /* Ajuste para la barra lateral (Sidebar) */
+section[data-testid="stSidebar"] {
+    background-color: #F8F9FA !important; /* Un gris muy sutil para que contraste con el fondo blanco de la app */
+    border-right: 1px solid #E0E0E0;
+}
+
+/* Forzar contraste alto en los textos del menú lateral (Dashboard, Finanzas, Catálogos) */
+section[data-testid="stSidebar"] span, 
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] a {
+    color: #2C3E50 !important; /* Gris oscuro corporativo de alta legibilidad */
+    font-weight: 600 !important; /* Le da un poco más de cuerpo a la letra */
+}
+
+/* Forzar que los íconos del menú también se oscurezcan y tengan contraste */
+section[data-testid="stSidebar"] svg {
+    fill: #2C3E50 !important;
+    color: #2C3E50 !important;
+}
+
+/* Cambiar el color cuando pasas el mouse por encima de las opciones (Hover) */
+section[data-testid="stSidebar"] div[data-testid="stSidebarNavLink"]:hover {
+    background-color: #E9ECEF !important;
+    border-radius: 8px;
+}
+        
+        
+        
+        
+        
         /* 1. OCULTAR LOS CÍRCULOS DE RAÍZ */
         div[data-testid="stSidebar"] [data-testid="stWidgetMarkdownTooltipTarget"] {
             display: none !important;
