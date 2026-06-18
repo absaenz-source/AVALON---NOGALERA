@@ -179,6 +179,7 @@ ciclos_db = cargar_ciclos()
 if not ciclos_db:
     ciclos_db = ["Ciclo 2026"]
 
+
 # ==============================================================================
 # 4. PANEL LATERAL IZQUIERDO (Menú de Botones Premium de Alta Visibilidad)
 # ==============================================================================
