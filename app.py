@@ -180,23 +180,32 @@ if not ciclos_db:
     ciclos_db = ["Ciclo 2026"]
 
 # ==============================================================================
-# 4. PANEL LATERAL IZQUIERDO (Navegación limpia)
+# 4. PANEL LATERAL IZQUIERDO (Menú de Botones Premium de Alta Visibilidad)
 # ==============================================================================
+# Inicializamos el estado de la navegación si no existe
+if "opcion_menu" not in st.session_state:
+    st.session_state.opcion_menu = "Dashboard"
 
 with st.sidebar:
     st.image("logo_nogalera.png", use_container_width=True)
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Inyectamos etiquetas con estilo de color directamente en el texto de las opciones
-    opcion_menu = st.radio(
-        "Navegación",
-        [
-            '<span style="color: #111827 !important; font-weight: 700; font-size: 16px;">Dashboard</span>', 
-            '<span style="color: #111827 !important; font-weight: 700; font-size: 16px;">Finanzas</span>', 
-            '<span style="color: #111827 !important; font-weight: 700; font-size: 16px;">Catálogos</span>'
-        ],
-        label_visibility="collapsed"
-    )
+    st.markdown("<p style='color: #4A5568; font-weight: 700; margin-bottom: 5px; font-size: 14px;'>Navegación</p>", unsafe_allow_html=True)
+    
+    # Botón 1: Dashboard
+    if st.button("📊 Dashboard", use_container_width=True, type="secondary" if st.session_state.opcion_menu != "Dashboard" else "primary"):
+        st.session_state.opcion_menu = "Dashboard"
+        st.rerun()
+        
+    # Botón 2: Finanzas
+    if st.button("💵 Finanzas", use_container_width=True, type="secondary" if st.session_state.opcion_menu != "Finanzas" else "primary"):
+        st.session_state.opcion_menu = "Finanzas"
+        st.rerun()
+        
+    # Botón 3: Catálogos
+    if st.button("🗂️ Catálogos", use_container_width=True, type="secondary" if st.session_state.opcion_menu != "Catálogos" else "primary"):
+        st.session_state.opcion_menu = "Catálogos"
+        st.rerun()
     
     st.markdown("""
         <div style='position: fixed; bottom: 15px; left: 15px; color: #4A5568; font-size: 11px; font-family: sans-serif; font-weight: 600;'>
@@ -204,20 +213,14 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
-
 # ==============================================================================
 # 5. ÁREA CENTRAL DINÁMICA
 # ==============================================================================
-
-
-if "Dashboard" in opcion_menu:
+if st.session_state.opcion_menu == "Dashboard":
     mostrar_dashboard()
 
-elif "Finanzas" in opcion_menu:
+elif st.session_state.opcion_menu == "Finanzas":
     mostrar_finanzas()
 
-elif "Catálogos" in opcion_menu:
-    mostrar_catalogos()
-
-elif opcion_menu == "Catálogos":
+elif st.session_state.opcion_menu == "Catálogos":
     mostrar_catalogos()
