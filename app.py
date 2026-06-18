@@ -34,6 +34,17 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+
+        /* Asegurar que el botón de expandir la barra lateral sea visible */
+   button[data-testid="stSidebarCollapseButton"] {
+       color: #212529 !important;
+       background-color: #FFFFFF !important;
+       border: 1px solid #E0E0E0 !important;
+       left: 10px !important;
+       top: 10px !important;
+       }
+
+    
         /* 1. OCULTAR LOS CÍRCULOS DE RAÍZ */
         div[data-testid="stSidebar"] [data-testid="stWidgetMarkdownTooltipTarget"] {
             display: none !important;
