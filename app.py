@@ -208,11 +208,16 @@ with st.sidebar:
 # ==============================================================================
 # 5. ÁREA CENTRAL DINÁMICA
 # ==============================================================================
-if opcion_menu == "Dashboard":
+
+
+if "Dashboard" in opcion_menu:
     mostrar_dashboard()
 
-elif opcion_menu == "Finanzas":
+elif "Finanzas" in opcion_menu:
     mostrar_finanzas()
+
+elif "Catálogos" in opcion_menu:
+    mostrar_catalogos()
 
 elif opcion_menu == "Catálogos":
     mostrar_catalogos()
