@@ -62,85 +62,52 @@ st.markdown(
     /* ============================================================================== */
     /* DISEÑO EXCLUSIVO PARA LA BARRA LATERAL (SIDEBAR) CLARA Y PREMIUM */
     /* ============================================================================== */
-    section[data-testid="stSidebar"] {
-        background-color: #F1F3F5 !important; /* Gris sutil de fondo */
-        border-right: 1px solid #E0E0E0 !important;
-    }
 
-    /* Pegar el contenido del panel lateral al borde superior */
-    [data-testid="stSidebarUserContent"] {
-        padding-top: 0rem !important;
-    }
-
-    /* Ocultar círculos nativos de selección del st.radio en la barra lateral */
-    [data-testid="stSidebar"] [data-testid="stRadioButtonCustomComponent"],
-    [data-testid="stSidebar"] div.st-ba,
-    [data-testid="stSidebar"] .st-bd,
-    div[data-testid="stSidebar"] [data-testid="stWidgetMarkdownTooltipTarget"] {
-        display: none !important;
-    }
+/* ============================================================================== */
+    /* CONTROL TOTAL DEL ST.RADIO EN EL MENÚ LATERAL (Contraste Máximo) */
+    /* ============================================================================== */
     
-    /* Configuración base para cada opción de menú (st.radio transformados en botones) */
-    [data-testid="stSidebar"] [role="radiogroup"] label {
-        background-color: transparent !important;
-        padding: 12px 16px !important;
-        border-radius: 8px !important;
-        margin-bottom: 6px !important;
-        display: flex !important;
-        align-items: center !important;
-        width: 100% !important;
-        cursor: pointer !important;
-        transition: all 0.2s ease;
-        border-left: 5px solid transparent !important;
-    }
-
-    /* Color de texto para opciones NO SELECCIONADAS (Contraste alto oscuro) */
-    [data-testid="stSidebar"] [role="radiogroup"] label p {
-        color: #4A5568 !important; /* Gris oscuro nítido */
+    /* 1. Forzar color oscuro en los textos de las opciones NO seleccionadas */
+    [data-testid="stSidebar"] [role="radiogroup"] label p,
+    [data-testid="stSidebar"] [role="radiogroup"] label span,
+    div[data-testid="stSidebar"] div[role="radiogroup"] div[data-checked="false"] label p {
+        color: #1A252F !important; /* Gris carbón/Negro de alta visibilidad */
+        font-weight: 600 !important;
         font-size: 15px !important;
-        font-weight: 500 !important;
-        margin: 0 !important;
     }
 
-    /* Efecto Hover: Al pasar el mouse sobre una opción no seleccionada */
+    /* 2. Efecto Hover: Cuando pasas el mouse encima de las opciones */
     [data-testid="stSidebar"] [role="radiogroup"] label:hover {
         background-color: #E2E8F0 !important;
     }
     [data-testid="stSidebar"] [role="radiogroup"] label:hover p {
-        color: #1A202C !important;
+        color: #000000 !important; /* Negro puro al pasar el mouse */
     }
 
-    /* DISEÑO DE LA OPCIÓN SELECCIONADA ACTIVA (Fondo elegante y pestaña verde) */
+    /* 3. OPCIÓN SELECCIONADA ACTIVA (Fondo marcado y letra negra brillante) */
     [data-testid="stSidebar"] [role="radiogroup"] [aria-checked="true"] label,
     [data-testid="stSidebar"] [role="radiogroup"] [data-checked="true"] label,
     div[data-testid="stSidebar"] div[role="radiogroup"] div[data-checked="true"] {
-        background-color: #E2E8F0 !important; /* Fondo marcado */
-        border-left: 5px solid #4CAF50 !important; /* Pestaña verde Nogalera */
+        background-color: #DDE2E5 !important; /* Fondo gris medio que hace contraste */
+        border-left: 5px solid #4CAF50 !important; /* Tu pestaña verde de la Nogalera */
         border-radius: 8px !important;
     }
     
-    /* Texto de la opción seleccionada activa */
+    /* Texto de la opción que está activa actualmente */
     [data-testid="stSidebar"] [role="radiogroup"] [aria-checked="true"] label p,
     [data-testid="stSidebar"] [role="radiogroup"] [data-checked="true"] label p,
     div[data-testid="stSidebar"] div[role="radiogroup"] div[data-checked="true"] label p {
-        color: #111827 !important; /* Negro total/Gris ultra oscuro */
+        color: #000000 !important; /* Negro absoluto */
         font-weight: 700 !important;
     }
 
-    /* Forzar visibilidad del botón para encoger/expandir el menú lateral */
-    button[data-testid="stSidebarCollapseButton"] {
-        background-color: #FFFFFF !important;
-        color: #212529 !important;
-        border: 1px solid #E0E0E0 !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        z-index: 999999 !important;
-    }
-    button[data-testid="stSidebarCollapseButton"] svg {
-        fill: #212529 !important;
-        color: #212529 !important;
-    }
 
+
+
+
+
+
+    
     /* ============================================================================== */
     /* ENTRADAS DE DATOS Y FORMULARIOS COHESIVOS */
     /* ============================================================================== */
