@@ -115,7 +115,7 @@ with st.sidebar:
     if st.session_state.opcion_menu == "Finanzas":
         estilo_fz = "background-color: #2D3142; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
     else:
-        estilo_fz = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
+        estilo_fz = "background-color: #E2E8F0; color: #FFFFFF; font-weight: 600; border: 1px solid #CBD5E1;"
         
     st.markdown(f"""
         <div style='{estilo_fz} padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; cursor: pointer;'>
