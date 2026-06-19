@@ -157,10 +157,11 @@ with st.sidebar:
 # ==============================================================================
 # 5. ÁREA CENTRAL DINÁMICA
 # ==============================================================================
+
+st.error("🚨 ¡ATENCIÓN SITEMA! SI ESTÁS LEYENDO ESTO, EL SERVIDOR SÍ ESTÁ ACTUALIZADO 🚨")
 if st.session_state.opcion_menu == "Dashboard":
     mostrar_dashboard()
 
-st.error("🚨 ¡ATENCIÓN SITEMA! SI ESTÁS LEYENDO ESTO, EL SERVIDOR SÍ ESTÁ ACTUALIZADO 🚨")
 
 elif st.session_state.opcion_menu == "Finanzas":
     mostrar_finanzas()
