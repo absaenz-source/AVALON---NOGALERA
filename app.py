@@ -160,6 +160,8 @@ with st.sidebar:
 if st.session_state.opcion_menu == "Dashboard":
     mostrar_dashboard()
 
+st.error("🚨 ¡ATENCIÓN SITEMA! SI ESTÁS LEYENDO ESTO, EL SERVIDOR SÍ ESTÁ ACTUALIZADO 🚨")
+
 elif st.session_state.opcion_menu == "Finanzas":
     mostrar_finanzas()
 
