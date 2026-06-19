@@ -79,9 +79,8 @@ ciclos_db = cargar_ciclos()
 if not ciclos_db:
     ciclos_db = ["Ciclo 2026"]
 
-
 # ==============================================================================
-# 4. PANEL LATERAL IZQUIERDO (Navegación Limpia por Estados)
+# 4. PANEL LATERAL IZQUIERDO (Menú HTML de Alto Contraste)
 # ==============================================================================
 if "opcion_menu" not in st.session_state:
     st.session_state.opcion_menu = "Dashboard"
@@ -90,20 +89,59 @@ with st.sidebar:
     st.image("logo_nogalera.png", use_container_width=True)
     st.markdown("<br>", unsafe_allow_html=True)
     
-    st.markdown("<p style='color: #111827; font-weight: 700; margin-bottom: 5px; font-size: 14px;'>Navegación</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #111827; font-weight: 700; margin-bottom: 15px; font-size: 14px;'>Navegación</p>", unsafe_allow_html=True)
     
-    # Botón 1: Dashboard
-    if st.button("📊 Dashboard", use_container_width=True, type="primary" if st.session_state.opcion_menu == "Dashboard" else "secondary"):
+    # --- BOTÓN 1: DASHBOARD ---
+    # Definimos el estilo según si está seleccionado o no
+    if st.session_state.opcion_menu == "Dashboard":
+        estilo_db = "background-color: #4CAF50; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+    else:
+        estilo_db = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
+        
+    st.markdown(f"""
+        <div style='{estilo_db} padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; cursor: pointer;'>
+            <span style='font-size: 16px;'>📊 Dashboard</span>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Un pequeño botón invisible de Streamlit justo debajo para capturar el clic real de forma limpia
+    if st.button("👉 Ir a Dashboard", use_container_width=True, key="btn_db"):
         st.session_state.opcion_menu = "Dashboard"
         st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- BOTÓN 2: FINANZAS ---
+    if st.session_state.opcion_menu == "Finanzas":
+        estilo_fz = "background-color: #4CAF50; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+    else:
+        estilo_fz = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
         
-    # Botón 2: Finanzas
-    if st.button("💵 Finanzas", use_container_width=True, type="primary" if st.session_state.opcion_menu == "Finanzas" else "secondary"):
+    st.markdown(f"""
+        <div style='{estilo_fz} padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; cursor: pointer;'>
+            <span style='font-size: 16px;'>💵 Finanzas</span>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("👉 Ir a Finanzas", use_container_width=True, key="btn_fz"):
         st.session_state.opcion_menu = "Finanzas"
         st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- BOTÓN 3: CATÁLOGOS ---
+    if st.session_state.opcion_menu == "Catálogos":
+        estilo_ct = "background-color: #4CAF50; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+    else:
+        estilo_ct = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
         
-    # Botón 3: Catálogos
-    if st.button("🗂️ Catálogos", use_container_width=True, type="primary" if st.session_state.opcion_menu == "Catálogos" else "secondary"):
+    st.markdown(f"""
+        <div style='{estilo_ct} padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; cursor: pointer;'>
+            <span style='font-size: 16px;'>🗂️ Catálogos</span>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("👉 Ir a Catálogos", use_container_width=True, key="btn_ct"):
         st.session_state.opcion_menu = "Catálogos"
         st.rerun()
     
@@ -112,6 +150,8 @@ with st.sidebar:
             Nogalera Los Mezquites v1.0
         </div>
     """, unsafe_allow_html=True)
+
+
 
 
 # ==============================================================================
