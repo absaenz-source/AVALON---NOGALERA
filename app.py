@@ -91,48 +91,31 @@ with st.sidebar:
     
     st.markdown("<p style='color: #111827; font-weight: 700; margin-bottom: 15px; font-size: 14px;'>Navegación</p>", unsafe_allow_html=True)
     
-# --- BOTÓN 1: DASHBOARD ---
-# Definimos el estilo según si está seleccionado o no
-if st.session_state.opcion_menu == "Dashboard":
-    estilo_db = "background-color: #2D3142; color: #FFFFFF; font-weight: 700; border: 1px solid #748CAB;"
-else:
-    estilo_db = "background-color: #4F5D75; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
-
-# 1. Inyectamos CSS específico para ESTE botón usando su clave (key) única
-st.markdown(f"""
-    <style>
-    div[data-testid="stButton"] button[key="btn_db"] {{
-        {estilo_db}
-        padding: 12px; 
-        border-radius: 8px; 
-        margin-bottom: 10px; 
-        text-align: left; 
-        width: 100%;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        transition: all 0.3s ease;
-    }}
-    /* Efecto hover opcional para mejorar la experiencia visual */
-    div[data-testid="stButton"] button[key="btn_db"]:hover {{
-        opacity: 0.9;
-        border-color: #748CAB;
-    }}
-    </style>
-""", unsafe_allow_html=True)
-
-# 2. El botón ahora ES el contenedor. Al hacerle clic, se ejecuta la acción directamente.
-if st.button("📊 Dashboard", use_container_width=True, key="btn_db"):
-    st.session_state.opcion_menu = "Dashboard"
-    st.rerun()
+    # --- BOTÓN 1: DASHBOARD ---
+    # Definimos el estilo según si está seleccionado o no
+    if st.session_state.opcion_menu == "Dashboard":
+        estilo_db = "background-color: #4CAF50; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+    else:
+        estilo_db = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
+        
+    st.markdown(f"""
+        <div style='{estilo_db} padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; cursor: pointer;'>
+            <span style='font-size: 16px;'>📊 Dashboard</span>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Un pequeño botón invisible de Streamlit justo debajo para capturar el clic real de forma limpia
+    if st.button("👉 Ir a Dashboard", use_container_width=True, key="btn_db"):
+        st.session_state.opcion_menu = "Dashboard"
+        st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
     # --- BOTÓN 2: FINANZAS ---
     if st.session_state.opcion_menu == "Finanzas":
-        estilo_fz = "background-color: #2D3142; color: #FFFFFF; font-weight: 700; border: 1px solid #748CAB;"
+        estilo_fz = "background-color: #4CAF50; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
     else:
-        estilo_fz = "background-color: #E2E8F0; color: #FFFFFF; font-weight: 600; border: 1px solid #CBD5E1;"
+        estilo_fz = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
         
     st.markdown(f"""
         <div style='{estilo_fz} padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; cursor: pointer;'>
@@ -148,7 +131,7 @@ if st.button("📊 Dashboard", use_container_width=True, key="btn_db"):
 
     # --- BOTÓN 3: CATÁLOGOS ---
     if st.session_state.opcion_menu == "Catálogos":
-        estilo_ct = "background-color: #2D3142; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+        estilo_ct = "background-color: #4CAF50; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
     else:
         estilo_ct = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
         
