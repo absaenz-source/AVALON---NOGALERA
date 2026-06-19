@@ -25,7 +25,7 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# 2. INYECCIÓN DE ESTILOS CSS UNIFICADOS (Tema Claro de Alta Legibilidad)
+# 2. INYECCIÓN DE ESTILOS CSS UNIFICADOS (Contraste Absoluto para Botones)
 # ==============================================================================
 st.markdown(
     """
@@ -42,10 +42,9 @@ st.markdown(
         color: #212529 !important;
     }
 
-    /* Forzar a la pantalla principal a usar el 100% del ancho físico */
+    /* Ancho completo de la app */
     [data-testid="stAppViewBlockContainer"], 
-    .main .block-container,
-    .st-emotion-cache-1z16p0t {
+    .main .block-container {
         padding-top: 0.5rem !important;  
         padding-left: 2rem !important;   
         padding-right: 2rem !important;  
@@ -53,64 +52,61 @@ st.markdown(
         width: 100% !important;
     }
 
-    /* Ocultar la barra superior nativa de Streamlit */
+    /* Ocultar barra superior */
     [data-testid="stHeader"], header {
         display: none !important;
         height: 0px !important;
     }
 
-    /* ============================================================================== */
-    /* DISEÑO EXCLUSIVO PARA LA BARRA LATERAL (SIDEBAR) CLARA Y PREMIUM */
-    /* ============================================================================== */
+    /* Fondo de la barra lateral */
+    section[data-testid="stSidebar"] {
+        background-color: #F1F3F5 !important; 
+        border-right: 1px solid #E0E0E0 !important;
+    }
 
-/* ============================================================================== */
-    /* CONTROL TOTAL DEL ST.RADIO EN EL MENÚ LATERAL (Contraste Máximo) */
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 0rem !important;
+    }
+
+    /* ============================================================================== */
+    /* EL TRUCO DEFINITIVO: ESTILO FORZADO PARA NUESTROS BOTONES DEL MENÚ */
     /* ============================================================================== */
     
-    /* 1. Forzar color oscuro en los textos de las opciones NO seleccionadas */
-    [data-testid="stSidebar"] [role="radiogroup"] label p,
-    [data-testid="stSidebar"] [role="radiogroup"] label span,
-    div[data-testid="stSidebar"] div[role="radiogroup"] div[data-checked="false"] label p {
-        color: #1A252F !important; /* Gris carbón/Negro de alta visibilidad */
-        font-weight: 600 !important;
+    /* Forzar que CUALQUIER botón dentro del sidebar tenga texto oscuro y fondo visible */
+    [data-testid="stSidebar"] button {
+        background-color: #E2E8F0 !important; /* Fondo gris claro bien definido */
+        border: 1px solid #CBD5E1 !important; /* Borde sutil */
+        border-radius: 8px !important;
+        padding: 10px 16px !important;
+        margin-bottom: 2px !important;
+        transition: all 0.2s ease !important;
+    }
+
+    /* Forzar el color del texto e íconos a NEGRO ABSOLUTO para que sea ultra legible */
+    [data-testid="stSidebar"] button p,
+    [data-testid="stSidebar"] button span,
+    [data-testid="stSidebar"] button div {
+        color: #111827 !important; 
+        font-weight: 700 !important;
         font-size: 15px !important;
     }
 
-    /* 2. Efecto Hover: Cuando pasas el mouse encima de las opciones */
-    [data-testid="stSidebar"] [role="radiogroup"] label:hover {
-        background-color: #E2E8F0 !important;
-    }
-    [data-testid="stSidebar"] [role="radiogroup"] label:hover p {
-        color: #000000 !important; /* Negro puro al pasar el mouse */
+    /* Efecto cuando pasas el mouse por encima (Hover) */
+    [data-testid="stSidebar"] button:hover {
+        background-color: #CBD5E1 !important; /* Se oscurece el fondo al pasar el mouse */
+        border-color: #94A3B8 !important;
     }
 
-    /* 3. OPCIÓN SELECCIONADA ACTIVA (Fondo marcado y letra negra brillante) */
-    [data-testid="stSidebar"] [role="radiogroup"] [aria-checked="true"] label,
-    [data-testid="stSidebar"] [role="radiogroup"] [data-checked="true"] label,
-    div[data-testid="stSidebar"] div[role="radiogroup"] div[data-checked="true"] {
-        background-color: #DDE2E5 !important; /* Fondo gris medio que hace contraste */
-        border-left: 5px solid #4CAF50 !important; /* Tu pestaña verde de la Nogalera */
-        border-radius: 8px !important;
+    /* Cuando el botón corresponde a la pestaña ACTIVA (Primary de Streamlit) */
+    [data-testid="stSidebar"] button[kind="primary"] {
+        background-color: #4CAF50 !important; /* Verde Nogalera */
+        border-color: #45A049 !important;
     }
-    
-    /* Texto de la opción que está activa actualmente */
-    [data-testid="stSidebar"] [role="radiogroup"] [aria-checked="true"] label p,
-    [data-testid="stSidebar"] [role="radiogroup"] [data-checked="true"] label p,
-    div[data-testid="stSidebar"] div[role="radiogroup"] div[data-checked="true"] label p {
-        color: #000000 !important; /* Negro absoluto */
-        font-weight: 700 !important;
+    [data-testid="stSidebarUserContent"] button[kind="primary"] p {
+        color: #FFFFFF !important; /* Texto blanco brillante solo si está activo */
     }
 
-
-
-
-
-
-
-    
-    /* ============================================================================== */
-    /* ENTRADAS DE DATOS Y FORMULARIOS COHESIVOS */
-    /* ============================================================================== */
+    /* Inputs de datos beige del área central */
     .stTextInput input, .stNumberInput input, .stDateInput input, 
     div[data-baseweb="input"], 
     div[data-baseweb="select"] > div {
@@ -119,37 +115,16 @@ st.markdown(
         border: 1px solid #E5E7EB !important;  
         border-radius: 6px !important;
     }
-
-    div[data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
-    div[data-baseweb="select"] span {
-        color: #111827 !important;
-        font-weight: 500 !important;
-    }
-
-    ul[role="listbox"] li {
-        background-color: #FDFBF7 !important;
-        color: #111827 !important;
-    }
-
-    ul[role="listbox"] li:hover {
-        background-color: #F3F4F6 !important;
-    }
-
-    [data-testid="stForm"] {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E5E7EB !important;
-        padding: 2rem !important;
-        border-radius: 10px !important;
-    }
-
-    [data-testid="stSidebar"] [role="radiogroup"] {
-        gap: 2px !important;
-        padding-top: 10px;
-    }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+
+
+
+
+
 
 # ==============================================================================
 # 3. FUNCIONES DE BASE DE DATOS (Sincronización central)
