@@ -27,6 +27,10 @@ st.set_page_config(
 # ==============================================================================
 # 2. INYECCIÓN DE ESTILOS CSS UNIFICADOS (Contraste Absoluto para Botones)
 # ==============================================================================
+
+# ==============================================================================
+# 2. INYECCIÓN DE ESTILOS CSS UNIFICADOS (Contraste Quirúrgico)
+# ==============================================================================
 st.markdown(
     """
     <style>
@@ -35,9 +39,17 @@ st.markdown(
         background-color: #F8F9FA !important;
         color: #212529 !important;
     }
-    h1, h2, h3, h4, h5, h6, p, span, label {
+    
+    /* Textos del cuerpo principal únicamente */
+    [data-testid="stAppViewBlockContainer"] h1, 
+    [data-testid="stAppViewBlockContainer"] h2, 
+    [data-testid="stAppViewBlockContainer"] h3, 
+    [data-testid="stAppViewBlockContainer"] p, 
+    [data-testid="stAppViewBlockContainer"] span, 
+    [data-testid="stAppViewBlockContainer"] label {
         color: #212529 !important;
     }
+    
     div[data-testid="stMetricValue"], div[data-testid="marker-cluster"] {
         color: #212529 !important;
     }
@@ -69,41 +81,47 @@ st.markdown(
     }
 
     /* ============================================================================== */
-    /* EL TRUCO DEFINITIVO: ESTILO FORZADO PARA NUESTROS BOTONES DEL MENÚ */
+    /* EL TRUCO DEFINITIVO: DESTRUCCIÓN DEL GRIS TRANSPARENTE EN BOTONES NATIVOS */
     /* ============================================================================== */
     
-    /* Forzar que CUALQUIER botón dentro del sidebar tenga texto oscuro y fondo visible */
-    [data-testid="stSidebar"] button {
-        background-color: #E2E8F0 !important; /* Fondo gris claro bien definido */
-        border: 1px solid #CBD5E1 !important; /* Borde sutil */
+    /* Forzar diseño base de botones secundarios (No seleccionados) en el Sidebar */
+    [data-testid="stSidebar"] button[data-testid*="stBaseButton-secondary"] {
+        background-color: #E2E8F0 !important; 
+        border: 1px solid #CBD5E1 !important;
         border-radius: 8px !important;
         padding: 10px 16px !important;
         margin-bottom: 2px !important;
-        transition: all 0.2s ease !important;
+        width: 100% !important;
     }
 
-    /* Forzar el color del texto e íconos a NEGRO ABSOLUTO para que sea ultra legible */
-    [data-testid="stSidebar"] button p,
-    [data-testid="stSidebar"] button span,
-    [data-testid="stSidebar"] button div {
+    /* Texto oscuro de alta visibilidad para botones no seleccionados */
+    [data-testid="stSidebar"] button[data-testid*="stBaseButton-secondary"] p {
         color: #111827 !important; 
         font-weight: 700 !important;
         font-size: 15px !important;
     }
 
-    /* Efecto cuando pasas el mouse por encima (Hover) */
-    [data-testid="stSidebar"] button:hover {
-        background-color: #CBD5E1 !important; /* Se oscurece el fondo al pasar el mouse */
+    /* Efecto Hover para los botones secundarios */
+    [data-testid="stSidebar"] button[data-testid*="stBaseButton-secondary"]:hover {
+        background-color: #CBD5E1 !important;
         border-color: #94A3B8 !important;
     }
 
-    /* Cuando el botón corresponde a la pestaña ACTIVA (Primary de Streamlit) */
-    [data-testid="stSidebar"] button[kind="primary"] {
+    /* Forzar diseño del botón primario (Pestaña Activa) */
+    [data-testid="stSidebar"] button[data-testid*="stBaseButton-primary"] {
         background-color: #4CAF50 !important; /* Verde Nogalera */
-        border-color: #45A049 !important;
+        border: 1px solid #45A049 !important;
+        border-radius: 8px !important;
+        padding: 10px 16px !important;
+        margin-bottom: 2px !important;
+        width: 100% !important;
     }
-    [data-testid="stSidebarUserContent"] button[kind="primary"] p {
-        color: #FFFFFF !important; /* Texto blanco brillante solo si está activo */
+
+    /* Texto blanco brillante e indestructible para la pestaña activa */
+    [data-testid="stSidebar"] button[data-testid*="stBaseButton-primary"] p {
+        color: #FFFFFF !important; 
+        font-weight: 700 !important;
+        font-size: 15px !important;
     }
 
     /* Inputs de datos beige del área central */
@@ -119,8 +137,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-
 
 
 
