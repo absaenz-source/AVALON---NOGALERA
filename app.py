@@ -24,123 +24,32 @@ st.set_page_config(
     layout="wide"
 )
 
-# ==============================================================================
-# 2. INYECCIÓN DE ESTILOS CSS UNIFICADOS (Contraste Absoluto para Botones)
-# ==============================================================================
 
 # ==============================================================================
-# 2. INYECCIÓN DE ESTILOS CSS UNIFICADOS (Contraste Quirúrgico)
+# 2. INYECCIÓN DE ESTILOS CSS (Estructura de Pantalla Limpia)
 # ==============================================================================
 st.markdown(
     """
     <style>
-    /* 1. Fondo principal de la app y textos generales */
-    .stApp {
-        background-color: #F8F9FA !important;
-        color: #212529 !important;
-    }
-    
-    /* Textos del cuerpo principal únicamente */
-    [data-testid="stAppViewBlockContainer"] h1, 
-    [data-testid="stAppViewBlockContainer"] h2, 
-    [data-testid="stAppViewBlockContainer"] h3, 
-    [data-testid="stAppViewBlockContainer"] p, 
-    [data-testid="stAppViewBlockContainer"] span, 
-    [data-testid="stAppViewBlockContainer"] label {
-        color: #212529 !important;
-    }
-    
-    div[data-testid="stMetricValue"], div[data-testid="marker-cluster"] {
-        color: #212529 !important;
-    }
-
-    /* Ancho completo de la app */
+    /* Forzar ancho completo de la aplicación sin márgenes gigantes */
     [data-testid="stAppViewBlockContainer"], 
     .main .block-container {
-        padding-top: 0.5rem !important;  
+        padding-top: 1rem !important;  
         padding-left: 2rem !important;   
         padding-right: 2rem !important;  
         max-width: 100% !important;      
         width: 100% !important;
     }
 
-    /* Ocultar barra superior */
+    /* Ocultar la barra superior por estética del ERP */
     [data-testid="stHeader"], header {
         display: none !important;
         height: 0px !important;
-    }
-
-    /* Fondo de la barra lateral */
-    section[data-testid="stSidebar"] {
-        background-color: #F1F3F5 !important; 
-        border-right: 1px solid #E0E0E0 !important;
-    }
-
-    [data-testid="stSidebarUserContent"] {
-        padding-top: 0rem !important;
-    }
-
-    /* ============================================================================== */
-    /* EL TRUCO DEFINITIVO: DESTRUCCIÓN DEL GRIS TRANSPARENTE EN BOTONES NATIVOS */
-    /* ============================================================================== */
-    
-    /* Forzar diseño base de botones secundarios (No seleccionados) en el Sidebar */
-    [data-testid="stSidebar"] button[data-testid*="stBaseButton-secondary"] {
-        background-color: #E2E8F0 !important; 
-        border: 1px solid #CBD5E1 !important;
-        border-radius: 8px !important;
-        padding: 10px 16px !important;
-        margin-bottom: 2px !important;
-        width: 100% !important;
-    }
-
-    /* Texto oscuro de alta visibilidad para botones no seleccionados */
-    [data-testid="stSidebar"] button[data-testid*="stBaseButton-secondary"] p {
-        color: #111827 !important; 
-        font-weight: 700 !important;
-        font-size: 15px !important;
-    }
-
-    /* Efecto Hover para los botones secundarios */
-    [data-testid="stSidebar"] button[data-testid*="stBaseButton-secondary"]:hover {
-        background-color: #CBD5E1 !important;
-        border-color: #94A3B8 !important;
-    }
-
-    /* Forzar diseño del botón primario (Pestaña Activa) */
-    [data-testid="stSidebar"] button[data-testid*="stBaseButton-primary"] {
-        background-color: #4CAF50 !important; /* Verde Nogalera */
-        border: 1px solid #45A049 !important;
-        border-radius: 8px !important;
-        padding: 10px 16px !important;
-        margin-bottom: 2px !important;
-        width: 100% !important;
-    }
-
-    /* Texto blanco brillante e indestructible para la pestaña activa */
-    [data-testid="stSidebar"] button[data-testid*="stBaseButton-primary"] p {
-        color: #FFFFFF !important; 
-        font-weight: 700 !important;
-        font-size: 15px !important;
-    }
-
-    /* Inputs de datos beige del área central */
-    .stTextInput input, .stNumberInput input, .stDateInput input, 
-    div[data-baseweb="input"], 
-    div[data-baseweb="select"] > div {
-        background-color: #FDFBF7 !important;  
-        color: #111827 !important;              
-        border: 1px solid #E5E7EB !important;  
-        border-radius: 6px !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
-
-
-
-
 
 # ==============================================================================
 # 3. FUNCIONES DE BASE DE DATOS (Sincronización central)
