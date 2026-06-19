@@ -82,6 +82,9 @@ if not ciclos_db:
 # ==============================================================================
 # 4. PANEL LATERAL IZQUIERDO (Menú HTML de Alto Contraste)
 # ==============================================================================
+
+import streamlit as st
+
 if "opcion_menu" not in st.session_state:
     st.session_state.opcion_menu = "Dashboard"
 
@@ -89,22 +92,21 @@ with st.sidebar:
     st.image("logo_nogalera.png", use_container_width=True)
     st.markdown("<br>", unsafe_allow_html=True)
     
-    st.markdown("<p style='color: #111827; font-weight: 700; margin-bottom: 15px; font-size: 14px;'>Navegación</p>", unsafe_allow_html=True)
+    # Texto de sección usando el verde oliva de la paleta
+    st.markdown("<p style='color: #91972A; font-weight: 700; margin-bottom: 15px; font-size: 14px; letter-spacing: 0.5px;'>NAVEGACIÓN</p>", unsafe_allow_html=True)
     
     # --- BOTÓN 1: DASHBOARD ---
-    # Definimos el estilo según si está seleccionado o no
     if st.session_state.opcion_menu == "Dashboard":
-        estilo_db = "background-color: #4CAF50; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+        estilo_db = "background-color: #91972A; color: #FFFFFF; font-weight: 700; border: 1px solid #B6C454;"
     else:
-        estilo_db = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
+        estilo_db = "background-color: #E6D3A3; color: #91972A; font-weight: 600; border: 1px solid #D8D174;"
         
     st.markdown(f"""
-        <div style='{estilo_db} padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; cursor: pointer;'>
+        <div style='{estilo_db} padding: 12px; border-radius: 8px; margin-bottom: 5px; text-align: left;'>
             <span style='font-size: 16px;'>📊 Dashboard</span>
         </div>
     """, unsafe_allow_html=True)
     
-    # Un pequeño botón invisible de Streamlit justo debajo para capturar el clic real de forma limpia
     if st.button("👉 Ir a Dashboard", use_container_width=True, key="btn_db"):
         st.session_state.opcion_menu = "Dashboard"
         st.rerun()
@@ -113,12 +115,12 @@ with st.sidebar:
 
     # --- BOTÓN 2: FINANZAS ---
     if st.session_state.opcion_menu == "Finanzas":
-        estilo_fz = "background-color: #4CAF50; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+        estilo_fz = "background-color: #91972A; color: #FFFFFF; font-weight: 700; border: 1px solid #B6C454;"
     else:
-        estilo_fz = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
+        estilo_fz = "background-color: #E6D3A3; color: #91972A; font-weight: 600; border: 1px solid #D8D174;"
         
     st.markdown(f"""
-        <div style='{estilo_fz} padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; cursor: pointer;'>
+        <div style='{estilo_fz} padding: 12px; border-radius: 8px; margin-bottom: 5px; text-align: left;'>
             <span style='font-size: 16px;'>💵 Finanzas</span>
         </div>
     """, unsafe_allow_html=True)
@@ -131,12 +133,12 @@ with st.sidebar:
 
     # --- BOTÓN 3: CATÁLOGOS ---
     if st.session_state.opcion_menu == "Catálogos":
-        estilo_ct = "background-color: #4CAF50; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+        estilo_ct = "background-color: #91972A; color: #FFFFFF; font-weight: 700; border: 1px solid #B6C454;"
     else:
-        estilo_ct = "background-color: #E2E8F0; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
+        estilo_ct = "background-color: #E6D3A3; color: #91972A; font-weight: 600; border: 1px solid #D8D174;"
         
     st.markdown(f"""
-        <div style='{estilo_ct} padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; cursor: pointer;'>
+        <div style='{estilo_ct} padding: 12px; border-radius: 8px; margin-bottom: 5px; text-align: left;'>
             <span style='font-size: 16px;'>🗂️ Catálogos</span>
         </div>
     """, unsafe_allow_html=True)
@@ -145,13 +147,12 @@ with st.sidebar:
         st.session_state.opcion_menu = "Catálogos"
         st.rerun()
     
+    # Pie de página con el tono Olive oscuro pero suavizado para el diseño
     st.markdown("""
-        <div style='position: fixed; bottom: 15px; left: 15px; color: #4A5568; font-size: 11px; font-family: sans-serif; font-weight: 600;'>
+        <div style='position: fixed; bottom: 15px; left: 15px; color: #91972A; opacity: 0.8; font-size: 11px; font-family: sans-serif; font-weight: 600;'>
             Nogalera Los Mezquites v1.0
         </div>
     """, unsafe_allow_html=True)
-
-
 
 
 # ==============================================================================
