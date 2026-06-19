@@ -94,7 +94,7 @@ with st.sidebar:
     # --- BOTÓN 1: DASHBOARD ---
     # Definimos el estilo según si está seleccionado o no
     if st.session_state.opcion_menu == "Dashboard":
-        estilo_db = "background-color: #2D3142; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+        estilo_db = "background-color: #2D3142; color: #FFFFFF; font-weight: 700; border: 1px solid #748CAB;"
     else:
         estilo_db = "background-color: #4F5D75; color: #111827; font-weight: 600; border: 1px solid #CBD5E1;"
         
