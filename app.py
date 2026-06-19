@@ -113,7 +113,7 @@ with st.sidebar:
 
     # --- BOTÓN 2: FINANZAS ---
     if st.session_state.opcion_menu == "Finanzas":
-        estilo_fz = "background-color: #2D3142; color: #FFFFFF; font-weight: 700; border: 1px solid #45A049;"
+        estilo_fz = "background-color: #2D3142; color: #FFFFFF; font-weight: 700; border: 1px solid #748CAB;"
     else:
         estilo_fz = "background-color: #E2E8F0; color: #FFFFFF; font-weight: 600; border: 1px solid #CBD5E1;"
         
